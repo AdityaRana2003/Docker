@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: localcloud_web
+    restart: unless-stopped
+    volumes:
+      - uploads_data:/data/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - localnet
+    deploy: # shown for demonstration; doesn't affect local docker-compose but useful for report
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: localcloud_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+    networks:
+      - localnet
+
+  # optional: simple monitoring using docker stats in demo (no extra container)
+  # you could add portainer or cAdvisor if you want GUI monitoring
+
+volumes:
+  uploads_data:
+
+networks:
+  localnet:
+    driver: bridge
